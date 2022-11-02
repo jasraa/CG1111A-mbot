@@ -19,7 +19,7 @@ int TURN_R = 5;
 int TURN_180 = 6;
 
 uint8_t Speed = 220; // motor speed 
-uint8_t slower_speed = 100; // speed to maintain straight line
+uint8_t slower_speed = 120; // speed to maintain straight line
 uint8_t faster_speed = 170; //speed if too close to the wall
 
 int left_delay = 800; //1 second
@@ -145,7 +145,7 @@ void motor_status(int i) {
   //adjust left
   else if (i == 2) {
     leftMotor.run(-slower_speed);
-    rightMotor.run(faster_speed); 
+    rightMotor.run(Speed); 
   }
   //adjust right
   else if (i == 3) {
@@ -257,13 +257,13 @@ void loop() {
     ultrasonic_distance = ultraSensor.distanceCm();
     ir_dist = calc_ir_dist(ir_value - ir_base);
 
-    
+    motor_status(FORWARD);
 
     if (ultrasonic_distance > 25) {
-      if (ir_dist < 6) { //ir detects that left side of the wall is too close
+      if (ir_dist < 9.5) { //ir detects that left side of the wall is too close
         motor_status(RIGHT); //adjust right
       }
-      else if (ir_dist > 10.5 && ir_dist < 11.5) { //ir detects that right side of the wall is too close
+      else if (ir_dist > 11.5 && ir_dist < 12.5) { //ir detects that right side of the wall is too close
         motor_status(LEFT); //adjust left
       }
       else {
