@@ -18,13 +18,13 @@ int TURN_L = 4;
 int TURN_R = 5;
 int TURN_180 = 6;
 
-uint8_t Speed = 220; // motor speed 
+uint8_t Speed = 200; // motor speed 
 uint8_t slower_speed = 120; // speed to maintain straight line
 uint8_t faster_speed = 170; //speed if too close to the wall
 
-int left_delay = 800; //1 second
-int right_delay = 800; //1 second
-int delay_180 = 1600; //delay twice of one 90degree turn
+int left_delay = 420; //1 second
+int right_delay = 420; //1 second
+int delay_180 = 800; //delay twice of one 90degree turn
 
 #define IR 3 //IR input pin at A3
 int ir_value;
@@ -40,9 +40,9 @@ float ir_dist;
 
 //floats to hold colour arrays
 float colourArray[] = {0,0,0};
-float whiteArray[] = {995,996,980}; //record down after cali :done
-float blackArray[] = {883,873,824}; //record down after cali :done
-float greyDiff[] = {112,123,156};
+float whiteArray[] = {938, 976,935}; //record down after cali :done
+float blackArray[] = {441, 682, 562}; //record down after cali :done
+float greyDiff[] = {497, 294, 373};
 
 float calc_ir_dist(int input) {
   float output = 0.00009 * input * input - 0.0969 * input + 29.745;
@@ -64,21 +64,37 @@ void record_baseline_voltage() {
 
 void colour_checker() {
   //if White stop and play tune
-
+  if (colourArray[0] > 220) { // red, orange, purple, white
+    if (colourArray[1] > 35 && colourArray[1] < 90) { // for red
+      motor_status(TURN_L);
+    }
+    else if ({
+      motor_status(TURN_180);
+    }
+  }
+  }
   //if orange, turn 180
+  if (colourArray[0] > 220 )& colourArray[1] > 170 && colourArray[2] > 130) {
+    motor_status(TURN_180);
+  }  
   
   //if red, turn left
-  if (colourArray[0] > 250 && colourArray[1] < 220 && colourArray[2] < 220) {
-    motor_status(LEFT);
+  else if (colourArray[0] > 220 && colourArray[1] > 35 && colourArray[2]>45) {
+    motor_status(TURN_L);
   }
-  
-  //if blue, two right turns
 
+  //if blue, two right turns
+  else if (colourArray[0] > 140 && colourArray[1] > 200 && colourArray[2] > 200){
+    motor_status(8);
+  }
   //if green, turn right
 
   //if purple, two left turns
 
   //recheck ldr if colour unsure
+  else {
+    get_colour();
+  }
 }
 
 void get_colour() {
@@ -131,6 +147,15 @@ void LED_status(int i) {
   }
 }
 
+void motor_stop() {
+  leftMotor.stop();  
+  rightMotor.stop(); 
+}
+
+void motor_forward(){
+  leftMotor.run(-Speed);
+  rightMotor.run(Speed);
+}
 void motor_status(int i) {
   //stop
   if (i == 0) {
@@ -149,7 +174,7 @@ void motor_status(int i) {
   }
   //adjust right
   else if (i == 3) {
-    leftMotor.run(-faster_speed);
+    leftMotor.run(-Speed);
     rightMotor.run(slower_speed); 
   }
   //turn left
@@ -157,9 +182,10 @@ void motor_status(int i) {
     leftMotor.run(Speed);
     rightMotor.run(Speed);
     delay(left_delay);
-    motor_status(STOP);
+    motor_stop();
+    delay(200);
   }
-   //turn right
+  //turn right
   else if(i == 5) {
     leftMotor.run(-Speed);
     rightMotor.run(-Speed);
@@ -171,7 +197,7 @@ void motor_status(int i) {
     leftMotor.run(Speed);
     rightMotor.run(Speed);
     delay(delay_180);
-    motor_status(STOP);
+    motor_stop();
   }
   //two left turns
   else if (i == 7) {
@@ -182,12 +208,23 @@ void motor_status(int i) {
     rightMotor.run(Speed);
     leftMotor.stop();  
     rightMotor.stop(); 
-    delay(500);
+    delay(1000);
     leftMotor.run(Speed);
     rightMotor.run(Speed);
   }
 
   //two right turns
+  else {
+    leftMotor.run(-Speed);
+    rightMotor.run(-Speed);
+    delay(right_delay);
+    motor_forward();
+    delay(700);
+    leftMotor.run(-Speed);
+    rightMotor.run(-Speed);
+    delay(right_delay);
+    motor_stop();
+  }
 }
 
 void setBalance() {
@@ -239,7 +276,8 @@ void print_calibration() //print the maximum, least possible value and range of 
 
 void setup() {
   Serial.begin(9600);
-  setBalance(); //calibrate ldr before starting
+  LED_status(0);
+  //setBalance(); //calibrate ldr before starting
 }
 
 void loop() {
