@@ -18,13 +18,13 @@ int TURN_L = 4;
 int TURN_R = 5;
 int TURN_180 = 6;
 
-uint8_t Speed = 100; // motor speed 
-uint8_t slower_speed = 30; // speed to maintain straight line
-uint8_t faster_speed = 90; //speed if too close to the wall
+uint8_t Speed = 220; // motor speed 
+uint8_t slower_speed = 100; // speed to maintain straight line
+uint8_t faster_speed = 170; //speed if too close to the wall
 
-int left_delay = 1000; //1 second
-int right_delay = 1000; //1 second
-int delay_180 = 2000; //delay twice of one 90degree turn
+int left_delay = 800; //1 second
+int right_delay = 800; //1 second
+int delay_180 = 1600; //delay twice of one 90degree turn
 
 #define IR 3 //IR input pin at A3
 int ir_value;
@@ -40,9 +40,9 @@ float ir_dist;
 
 //floats to hold colour arrays
 float colourArray[] = {0,0,0};
-float whiteArray[] = {250,250,250}; //record down after cali
-float blackArray[] = {0,0,0}; //record down after cali
-float greyDiff[] = {103,136,168};
+float whiteArray[] = {995,996,980}; //record down after cali :done
+float blackArray[] = {883,873,824}; //record down after cali :done
+float greyDiff[] = {112,123,156};
 
 float calc_ir_dist(int input) {
   float output = 0.00009 * input * input - 0.0969 * input + 29.745;
@@ -233,6 +233,7 @@ void print_calibration() //print the maximum, least possible value and range of 
      Serial.print(blackArray[i]);
      Serial.print(" greyDiff: ");
      Serial.println(greyDiff[i]);
+    
   }
 }
 
@@ -256,8 +257,10 @@ void loop() {
     ultrasonic_distance = ultraSensor.distanceCm();
     ir_dist = calc_ir_dist(ir_value - ir_base);
 
-    if (ultrasonic_distance > 13) {
-      if (ir_dist < 6.5) { //ir detects that left side of the wall is too close
+    
+
+    if (ultrasonic_distance > 25) {
+      if (ir_dist < 6) { //ir detects that left side of the wall is too close
         motor_status(RIGHT); //adjust right
       }
       else if (ir_dist > 10.5 && ir_dist < 11.5) { //ir detects that right side of the wall is too close
@@ -267,7 +270,7 @@ void loop() {
         motor_status(FORWARD); //if both side detects no wall, move forward
       }
     //if too close to right side, move left
-    }else if (ultrasonic_distance < 13) {
+    }else if (ultrasonic_distance < 8.5) {
       motor_status(LEFT);
     }
     else {
