@@ -49,6 +49,29 @@ float calc_ir_dist(int input) {
   return output;
 }
 
+void LED_status(int i) {
+  if (i == 0) {
+    //turn off
+    analogWrite(A0, 0);
+    analogWrite(A1, 0);
+  }
+  else if (i == 1) {
+    //RED
+    analogWrite(A0, 255);
+    analogWrite(A1, 255);
+  }
+  else if (i == 2) {
+    //GREEN
+    analogWrite(A0, 255);
+    analogWrite(A1, 0);
+  }
+  else {
+    //BLUE
+    analogWrite(A0, 0);
+    analogWrite(A1, 255);
+  }
+}
+
 void record_baseline_voltage() {
   if (ir_count == 0) {
     LED_status(1); //turn on one led
@@ -63,37 +86,20 @@ void record_baseline_voltage() {
 }
 
 void colour_checker() {
-  //if White stop and play tune
-  if (colourArray[0] > 220) { // red, orange, purple, white
-    if (colourArray[1] > 35 && colourArray[1] < 90) { // for red
-      motor_status(TURN_L);
-    }
-    else if ({
-      motor_status(TURN_180);
-    }
-  }
-  }
-  //if orange, turn 180
-  if (colourArray[0] > 220 )& colourArray[1] > 170 && colourArray[2] > 130) {
+  if (colourArray[0] >= 220 && colourArray[1] >= 170 && colourArray[2] >= 130) {
     motor_status(TURN_180);
-  }  
-  
-  //if red, turn left
-  else if (colourArray[0] > 220 && colourArray[1] > 35 && colourArray[2]>45) {
+  }
+  else if (colourArray[0]>= 220 && colourArray[1] >= 35 && colourArray[2] >= 45) {
     motor_status(TURN_L);
   }
-
-  //if blue, two right turns
-  else if (colourArray[0] > 140 && colourArray[1] > 200 && colourArray[2] > 200){
+  else if (colourArray[0] >= 140 && colourArray[1] >= 205 && colourArray[2] >= 205) {
     motor_status(8);
   }
-  //if green, turn right
-
-  //if purple, two left turns
-
-  //recheck ldr if colour unsure
-  else {
-    get_colour();
+  else if (colourArray[0] >= 180 && colourArray[1] >= 250 && colourArray[2] >= 180) {
+    motor_status(TURN_R);
+  }
+  else if (colourArray[0] >= 220 && colourArray[1] >= 150 && colourArray[2]>= 220) {
+    motor_status(7);
   }
 }
 
@@ -124,28 +130,7 @@ int getAvgReading(int times) {
   return total / times;
 }
 
-void LED_status(int i) {
-  if (i == 0) {
-    //turn off
-    analogWrite(A0, 0);
-    analogWrite(A1, 0);
-  }
-  else if (i == 1) {
-    //RED
-    analogWrite(A0, 255);
-    analogWrite(A1, 255);
-  }
-  else if (i == 2) {
-    //GREEN
-    analogWrite(A0, 255);
-    analogWrite(A1, 0);
-  }
-  else {
-    //BLUE
-    analogWrite(A0, 0);
-    analogWrite(A1, 255);
-  }
-}
+
 
 void motor_stop() {
   leftMotor.stop();  
